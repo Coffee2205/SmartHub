@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Smart Home Hub is a premium smart-home command center with elegant automation, advanced security, and seamless cross-platform control." />
+    <meta name="theme-color" content="#0f172a" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Smart Home Hub | Premium Home Intelligence" />
+    <meta property="og:description" content="Experience modern living with a premium smart-home hub built for speed, security, and intentional design." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1400&q=80" />
+    <meta property="og:url" content="https://smart-home-hub.vercel.app" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Smart Home Hub | Premium Home Intelligence</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme')
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light'
+          var root = document.documentElement
+          root.classList.toggle('dark', theme === 'dark')
+          root.setAttribute('data-theme', theme)
+          root.style.colorScheme = theme
+        } catch (error) {
+          console.error('Theme bootstrap failed', error)
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
