@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { AnimatePresence } from 'framer-motion'
-import { ChatbotWidget } from './components/ChatbotWidget'
+import { ChatbotWidget } from './components/ChatBot/ChatWidget'
 import { LoadingScreen } from './components/LoadingScreen'
 import { useAnalytics } from './hooks/useAnalytics'
 import { useSmoothScroll } from './hooks/useSmoothScroll'

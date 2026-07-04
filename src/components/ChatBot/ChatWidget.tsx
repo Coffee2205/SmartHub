@@ -2,46 +2,58 @@ import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Bot, SendHorizontal, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { chatbotSeed } from '../utils/data'
-
-type Message = {
-  role: 'user' | 'bot'
-  text: string
-}
-
-function getBotReply(input: string): string {
-  const normalized = input.trim().toLowerCase()
-  const key = Object.keys(chatbotSeed).find((entry) => normalized.includes(entry))
-
-  if (!key) {
-    return 'I can answer about compatibility, setup, security, and pricing. Try one of those keywords.'
-  }
-
-  return chatbotSeed[key] ?? 'Hi! I can help with features, pricing, setup time, and compatibility.'
-}
+import { getGroqBotReply } from '../../utils/groq'
+import type { ChatMessage } from '../../types/chat'
 
 export function ChatbotWidget() {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
-  const [messages, setMessages] = useState<Message[]>([
+  const [loading, setLoading] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      role: 'bot',
-      text: 'Welcome to Smart Home Hub. Ask me anything about this product.',
+      role: 'assistant',
+      content: 'Welcome to Smart Home Hub. Ask me anything about this product.',
     },
   ])
 
   const reversed = useMemo(() => [...messages].slice(-6), [messages])
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
     const trimmed = value.trim()
-    if (!trimmed) {
+    if (!trimmed || loading) {
       return
     }
 
-    const reply = getBotReply(trimmed)
-    setMessages((current) => [...current, { role: 'user', text: trimmed }, { role: 'bot', text: reply }])
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: trimmed,
+    }
+
+    setMessages((current) => [...current, userMessage])
     setValue('')
+    setLoading(true)
+
+    const history: ChatMessage[] = [
+      {
+        role: 'system',
+        content: 'You are Smart Assistant for Smart Home Hub. Answer briefly, clearly and helpfully.',
+      },
+      ...messages,
+      userMessage,
+    ]
+
+    const result = await getGroqBotReply(history)
+
+    setMessages((current) => [
+      ...current,
+      {
+        role: 'assistant',
+        content: result.text,
+      },
+    ])
+    setLoading(false)
   }
 
   return (
@@ -77,7 +89,7 @@ export function ChatbotWidget() {
                       : 'mr-8 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
                   }`}
                 >
-                  {message.text}
+                  {message.content}
                 </div>
               ))}
             </div>
@@ -91,12 +103,16 @@ export function ChatbotWidget() {
               />
               <button
                 type="submit"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition hover:bg-cyan-400 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+                disabled={loading}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
                 aria-label="Send message"
               >
                 <SendHorizontal size={16} />
               </button>
             </form>
+            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+               Powered by your local Groq backend.
+            </p>
           </motion.section>
         ) : null}
       </AnimatePresence>
